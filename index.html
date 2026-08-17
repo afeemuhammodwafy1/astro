@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AstroWafy</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Google Fonts: Plus Jakarta Sans, JetBrains Mono, Noto Sans Bengali -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- App stylesheet -->
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="min-h-screen text-white selection:bg-white selection:text-black">
+
+  <!-- ===================== NAVBAR ===================== -->
+  <header class="border-b border-neutral-900">
+    <div class="max-w-6xl mx-auto px-4 sm:px-8 min-h-16 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+      <div class="text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-white whitespace-nowrap">
+        ASTRO<span class="text-neutral-600 font-normal">WAFY</span>
+      </div>
+      <nav class="flex items-center gap-3 sm:gap-6">
+        <a href="https://amwafy.xyz" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm lowercase text-neutral-500 hover:text-white transition-colors duration-300 whitespace-nowrap">contact</a>
+
+        <!-- Language Toggle -->
+        <div class="lang-toggle">
+          <button id="langEnBtn" type="button">EN</button>
+          <button id="langBnBtn" type="button">বাং</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================== CONTROL DASHBOARD ===================== -->
+  <div class="border-b border-[#171717] bg-neutral-900/30">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+
+      <!-- Date Input -->
+      <div class="flex items-center gap-3">
+        <label for="datePicker" class="text-[11px] uppercase tracking-widest text-neutral-500 hidden sm:block">date</label>
+        <input
+          id="datePicker"
+          type="date"
+          class="bg-black border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-neutral-500 transition-colors duration-300 w-full sm:w-auto"
+        />
+      </div>
+
+      <!-- Refresh Button -->
+      <button
+        id="refreshBtn"
+        class="btn-press flex items-center justify-center gap-2 bg-white text-black rounded-full px-5 py-2.5 text-xs sm:text-sm font-semibold tracking-wide hover:bg-neutral-200 transition-colors duration-300 self-start sm:self-auto"
+      >
+        <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform duration-500">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          <path d="M21 3v6h-6" />
+        </svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden flex-col items-center justify-center py-24 gap-4">
+      <div class="spinner"></div>
+      <p class="text-[11px] uppercase tracking-[0.3em] text-neutral-500">retrieving transmission</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden py-24 text-center">
+      <p class="text-white text-lg font-medium mb-2">Signal Lost</p>
+      <p class="text-neutral-500 text-sm">We couldn't retrieve data for this date. Please try another.</p>
+    </div>
+
+    <!-- Content -->
+    <div id="content" class="hidden">
+
+      <!-- Media Card -->
+      <div class="media-card relative border border-neutral-900 rounded-2xl overflow-hidden bg-neutral-950 fade-in">
+
+        <!-- One-Click Download Button — always visible, no hover/tap-to-reveal needed -->
+        <button id="oneClickDownloadBtn" type="button" class="one-click-download btn-press hidden">
+          <span id="oneClickDownloadLabel">Download</span>
+          <svg id="oneClickDownloadIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+            <path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M5 21h14" />
+          </svg>
+        </button>
+
+        <div id="mediaWrapper" class="w-full flex items-center justify-center bg-black">
+          <!-- image or iframe injected here -->
+        </div>
+
+        <!-- Hover overlay button (image only) -->
+        <div id="hdOverlay" class="hover-reveal absolute bottom-3 right-3 sm:bottom-4 sm:right-4 hidden">
+          <a id="hdLink" href="#" target="_blank" rel="noopener noreferrer"
+             class="flex items-center gap-2 bg-white/95 text-black text-xs font-semibold tracking-wide px-4 py-2 rounded-full backdrop-blur-sm hover:bg-white transition-colors duration-300">
+            <span>View HD Quality</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+              <path d="M7 17L17 7" /><path d="M7 7h10v10" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Information Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 mt-10 sm:mt-12">
+
+        <!-- Column 1: Title + Date -->
+        <div class="md:col-span-1 fade-in">
+          <h1 id="apodTitle" class="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4 transition-opacity duration-300"></h1>
+          <span id="apodDate" class="font-mono-tag inline-block text-[11px] tracking-widest text-neutral-400 border border-neutral-800 rounded-full px-3 py-1"></span>
+        </div>
+
+        <!-- Columns 2-3: Explanation -->
+        <div class="md:col-span-2 fade-in">
+          <p id="apodExplanation" class="justify-text text-[#a3a3a3] text-sm sm:text-[15px] leading-relaxed transition-opacity duration-300"></p>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-neutral-900 py-8">
+    <p class="text-center text-[11px] tracking-widest uppercase text-neutral-700">AstroWafy — Powered by NASA Open APIs</p>
+  </footer>
+
+  <!-- App script -->
+  <script src="script.js"></script>
+
+</body>
+</html>

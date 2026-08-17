@@ -1,0 +1,156 @@
+:root {
+  --bg: #050505;
+  --muted: #a3a3a3;
+  --hair: #171717;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  background-color: var(--bg);
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.font-mono-tag {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Invert native date input calendar icon to white */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.85;
+  cursor: pointer;
+}
+input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Fade transition utility */
+.fade-in {
+  animation: fadeIn 300ms ease-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hover overlay reveal (HD Quality link) — only fades on devices that actually
+   support hover (mouse/trackpad). Touch devices have no hover state, so it
+   stays visible there. */
+.hover-reveal {
+  transition: opacity 300ms ease, transform 300ms ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hover-reveal {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .media-card:hover .hover-reveal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Thin premium scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: #262626; border-radius: 8px; }
+
+/* Spinner */
+.spinner {
+  border: 2px solid #262626;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-press:active { transform: scale(0.97); }
+.btn-press:disabled { opacity: 0.6; cursor: wait; }
+
+.justify-text {
+  text-align: left;
+}
+@media (min-width: 640px) {
+  .justify-text {
+    text-align: justify;
+    text-justify: inter-word;
+  }
+}
+
+/* Bengali font override - scoped to translated content only */
+.bn-text {
+  font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Language toggle pill */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid #262626;
+  border-radius: 9999px;
+  padding: 2px;
+  background: #0a0a0a;
+}
+.lang-toggle button {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  min-width: 34px;
+  border-radius: 9999px;
+  color: #737373;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+.lang-toggle button.active {
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 600;
+}
+
+/* One-click download button — always visible, no hover required */
+.one-click-download {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000000;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  backdrop-filter: blur(6px);
+  transition: background-color 300ms ease, transform 150ms ease;
+}
+.one-click-download:hover {
+  background-color: #ffffff;
+}
+.one-click-download:active {
+  transform: scale(0.96);
+}
+.one-click-download:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (min-width: 640px) {
+  .one-click-download {
+    top: 16px;
+    right: 16px;
+    font-size: 12px;
+    padding: 9px 16px;
+  }
+}
