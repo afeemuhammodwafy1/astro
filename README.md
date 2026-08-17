@@ -1,150 +1,93 @@
-AstroWafy 🌌
+# AstroWafy 🌌
 
-«Explore NASA's Astronomy Picture of the Day with a beautiful, multilingual web experience.»
+> Explore the universe through NASA's Astronomy Picture of the Day.
 
-""Live Demo" (https://img.shields.io/badge/Live-Demo-00d9ff?style=for-the-badge)" (https://astro.amwafy.xyz)
-""GitHub" (https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)" (https://github.com/afeemuhammodwafy1/astro)
-""NASA APOD" (https://img.shields.io/badge/API-NASA%20APOD-0B3D91?style=for-the-badge)" (https://api.nasa.gov/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-00d9ff?style=for-the-badge)](https://astro.amwafy.xyz)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/afeemuhammodwafy1/astro)
+[![NASA APOD](https://img.shields.io/badge/NASA-APOD-0B3D91?style=for-the-badge&logo=nasa)](https://api.nasa.gov/)
 
-🌐 Live Demo
+## 🌐 Live Demo
 
-"Visit AstroWafy →" (https://astro.amwafy.xyz)
+[https://astro.amwafy.xyz](https://astro.amwafy.xyz)
 
-📖 About
+## 📖 About
 
-AstroWafy is a web application built around NASA's Astronomy Picture of the Day (APOD) API.
+**AstroWafy** is a web application that brings NASA's **Astronomy Picture of the Day (APOD)** to life through a simple and modern interface.
 
-It brings NASA's daily space imagery and astronomical information into a clean, responsive interface, while adding useful features such as HD image downloads, favorites, sharing, keyboard navigation, and Bengali/English language support.
+Discover amazing astronomy images and explore the universe directly from your browser.
 
-🚀 Features
+## ✨ Features
 
 - 🌌 NASA Astronomy Picture of the Day
-- 🖼️ HD Image Download
-- 🌐 Bengali & English Language Support
-- ❤️ Favorites System
-- 🔗 Share Feature
-- ⌨️ Keyboard Navigation
+- 🖼️ High-quality astronomy imagery
+- 📥 Image Download Option
 - 📱 Responsive Design
-- ✨ Modern Space-Themed Interface
+- 🎨 Modern Space-themed Interface
+- 🚀 Fast and Simple Experience
 
-🛰️ NASA APOD
+## 🛰️ NASA APOD API
 
-AstroWafy uses NASA's Astronomy Picture of the Day API to retrieve daily astronomy content.
+AstroWafy uses NASA's official **Astronomy Picture of the Day API**.
 
-Each APOD can include astronomical imagery together with information provided by NASA.
+NASA API:
 
-🌍 Language Support
+[https://api.nasa.gov/](https://api.nasa.gov/)
 
-AstroWafy supports:
+NASA APOD:
 
-- 🇬🇧 English
-- 🇧🇩 Bengali
+[https://apod.nasa.gov/](https://apod.nasa.gov/)
 
-This makes the experience more accessible to both English-speaking and Bengali-speaking users.
+## 🛠️ Tech Stack
 
-🛠️ Tech Stack
-
-- Node.js
-- Express.js
-- NASA APOD API
-- Google Translate API
-- Tailwind CSS
 - HTML5
+- CSS3
 - JavaScript
+- NASA APOD API
 
-📁 Project Structure
+## 🚀 Getting Started
 
-astro/
-├── .github/
-│   └── workflows/
-├── CNAME
-├── index.html
-├── script.js
-├── style.css
-└── README.md
+### Clone the repository
 
-🚀 Getting Started
-
-Prerequisites
-
-Make sure you have:
-
-- Node.js
-- npm
-- Git
-
-1. Clone the repository
-
+```bash
 git clone https://github.com/afeemuhammodwafy1/astro.git
 cd astro
+```
 
-2. Install dependencies
+### Run locally
 
-npm install
+Open the project in your browser or use a local development server.
 
-3. Start the application
+## 🌍 Deployment
 
-npm start
+The live version of AstroWafy is available at:
 
-The application will be available through your configured local server.
+[https://astro.amwafy.xyz](https://astro.amwafy.xyz)
 
-🔑 API
-
-AstroWafy uses:
-
-NASA Astronomy Picture of the Day API
-
-Official NASA API:
-
-https://api.nasa.gov/
-
-The application retrieves APOD content and presents it through the AstroWafy interface.
-
-📥 HD Download
-
-AstroWafy provides an option to download the available high-resolution astronomy image when provided by NASA's APOD data.
-
-❤️ Favorites
-
-Users can save astronomy content as favorites for easier access later.
-
-🔗 Sharing
-
-AstroWafy includes a sharing feature that makes it easy to share interesting astronomy discoveries with others.
-
-📱 Responsive Design
-
-The interface is designed to work across:
-
-- Desktop
-- Tablet
-- Mobile
-
-🤝 Contributing
+## 🤝 Contributing
 
 Contributions, suggestions, bug reports, and feature requests are welcome.
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a new branch
 3. Make your changes
 4. Commit your changes
-5. Push your branch
+5. Push to your branch
 6. Open a Pull Request
 
-📄 License
+## 📄 License
 
 This project is licensed under the MIT License.
 
-👨‍💻 Author
+## 👨‍💻 Author
 
-Afee Muhammod Wafy
+**Afee Muhammod Wafy**
 
-- Portfolio: "amwafy.xyz" (https://www.amwafy.xyz)
-- GitHub: "@afeemuhammodwafy1" (https://github.com/afeemuhammodwafy1)
-- Email: afeemuhammodwafy@yahoo.com
+- GitHub: [@afeemuhammodwafy1](https://github.com/afeemuhammodwafy1)
 
-⭐ Support
+## ⭐ Support
 
 If you enjoy AstroWafy, consider giving the repository a ⭐ on GitHub.
 
-Made with ❤️ by Afee Muhammod Wafy
+---
+
+**Built with ❤️ by Afee Muhammod Wafy**
