@@ -1,129 +1,112 @@
 // ===================== CONFIG =====================
-const CONFIG = {
-  API_KEY: 'bsog63BaN0sXddiIP6JakDc3agNjtmZ1pnyAumxO',
-  API_URL: 'https://api.nasa.gov/planetary/apod',
-  DEFAULT_LANG: 'en',
-  STORAGE_KEY: 'astrowafy_lang'
-};
+const apiKey = 'bsog63BaN0sXddiIP6JakDc3agNjtmZ1pnyAumxO';
+const API_URL = 'https://api.nasa.gov/planetary/apod';
 
 // ===================== I18N =====================
-const TRANSLATIONS = {
+const translations = {
   en: { untitled: 'Untitled' },
   bn: { untitled: 'শিরোনামহীন' }
 };
 
-// ===================== STATE =====================
-const state = {
-  lang: localStorage.getItem(CONFIG.STORAGE_KEY) || CONFIG.DEFAULT_LANG,
-  lastData: null,
-  translationCache: {},
-  currentDownloadUrl: '',
-  currentDownloadName: 'astrowafy-image.jpg'
-};
+let currentLang = localStorage.getItem('astrowafy_lang') || 'en';
+let lastAPODData = null;
+const translationCache = {};
 
-// ===================== DOM REFS =====================
-const DOM = {
-  langEn: document.getElementById('langEnBtn'),
-  langBn: document.getElementById('langBnBtn'),
-  datePicker: document.getElementById('datePicker'),
-  refreshBtn: document.getElementById('refreshBtn'),
-  refreshIcon: document.getElementById('refreshIcon'),
-  shareBtn: document.getElementById('shareBtn'),
-  loading: document.getElementById('loadingState'),
-  error: document.getElementById('errorState'),
-  content: document.getElementById('content'),
-  media: document.getElementById('mediaWrapper'),
-  hdOverlay: document.getElementById('hdOverlay'),
-  hdLink: document.getElementById('hdLink'),
-  download: document.getElementById('oneClickDownloadBtn'),
-  downloadLabel: document.getElementById('oneClickDownloadLabel'),
-  downloadIcon: document.getElementById('oneClickDownloadIcon'),
-  title: document.getElementById('apodTitle'),
-  date: document.getElementById('apodDate'),
-  explanation: document.getElementById('apodExplanation')
-};
+// ===================== DOM REFERENCES =====================
+const langEnBtn = document.getElementById('langEnBtn');
+const langBnBtn = document.getElementById('langBnBtn');
+const datePicker = document.getElementById('datePicker');
+const refreshBtn = document.getElementById('refreshBtn');
+const refreshIcon = document.getElementById('refreshIcon');
+const loadingState = document.getElementById('loadingState');
+const errorState = document.getElementById('errorState');
+const content = document.getElementById('content');
+const mediaWrapper = document.getElementById('mediaWrapper');
+const hdOverlay = document.getElementById('hdOverlay');
+const hdLink = document.getElementById('hdLink');
+const oneClickDownloadBtn = document.getElementById('oneClickDownloadBtn');
+const oneClickDownloadLabel = document.getElementById('oneClickDownloadLabel');
+const oneClickDownloadIcon = document.getElementById('oneClickDownloadIcon');
+const apodTitle = document.getElementById('apodTitle');
+const apodDate = document.getElementById('apodDate');
+const apodExplanation = document.getElementById('apodExplanation');
 
-// ===================== DATE HELPERS =====================
-const getTodayForAPOD = () => {
+let currentDownloadUrl = '';
+let currentDownloadName = 'astrowafy-image.jpg';
+
+// ===================== NASA TIME (UTC) =====================
+function getNASA Date() {
   const now = new Date();
-  const localHours = now.getHours();
-  const utcHours = now.getUTCHours();
-  
-  if (localHours >= 0 && localHours < 6 && utcHours >= 18) {
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
-  }
   return now.toISOString().split('T')[0];
-};
+}
 
-const todayUTC = () => new Date().toISOString().split('T')[0];
+function getMaxDate() {
+  const now = new Date();
+  return now.toISOString().split('T')[0];
+}
 
-const formatDateDMY = (isoDate) => {
+function formatDateDMY(isoDate) {
   if (!isoDate) return '';
   const [y, m, d] = isoDate.split('-');
   return `${d}-${m}-${y}`;
-};
+}
 
 // ===================== LANGUAGE =====================
-const applyLanguage = (lang) => {
-  state.lang = lang;
-  localStorage.setItem(CONFIG.STORAGE_KEY, lang);
-  
-  DOM.langEn.classList.toggle('active', lang === 'en');
-  DOM.langBn.classList.toggle('active', lang === 'bn');
-  
-  if (state.lastData) renderInfo(state.lastData);
-};
+function applyLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('astrowafy_lang', lang);
+  langEnBtn.classList.toggle('active', lang === 'en');
+  langBnBtn.classList.toggle('active', lang === 'bn');
+  if (lastAPODData) renderInfo(lastAPODData);
+}
 
-DOM.langEn.addEventListener('click', () => applyLanguage('en'));
-DOM.langBn.addEventListener('click', () => applyLanguage('bn'));
+langEnBtn.addEventListener('click', () => applyLanguage('en'));
+langBnBtn.addEventListener('click', () => applyLanguage('bn'));
 
-const translateText = async (text, targetLang) => {
+async function translateText(text, targetLang) {
   if (!text || targetLang === 'en') return text;
-  
   try {
     const res = await fetch(
       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`
     );
-    if (!res.ok) throw new Error('Translation failed');
+    if (!res.ok) throw new Error('Translation request failed');
     const data = await res.json();
-    return data[0].map(chunk => chunk[0]).join('');
+    return data[0].map((chunk) => chunk[0]).join('');
   } catch (err) {
-    console.error('Translation error:', err);
+    console.error('AstroWafy translation error:', err);
     return text;
   }
-};
+}
 
-// ===================== UI HELPERS =====================
-const setState = (stateType) => {
-  [DOM.loading, DOM.error, DOM.content].forEach(el => {
-    el.classList.add('hidden');
-    el.classList.remove('flex');
-  });
-  
-  if (stateType === 'loading') {
-    DOM.loading.classList.remove('hidden');
-    DOM.loading.classList.add('flex');
-  } else if (stateType === 'error') {
-    DOM.error.classList.remove('hidden');
-  } else if (stateType === 'content') {
-    DOM.content.classList.remove('hidden');
+// ===================== HELPERS =====================
+function setState(state) {
+  loadingState.classList.add('hidden');
+  loadingState.classList.remove('flex');
+  errorState.classList.add('hidden');
+  content.classList.add('hidden');
+
+  if (state === 'loading') {
+    loadingState.classList.remove('hidden');
+    loadingState.classList.add('flex');
+  } else if (state === 'error') {
+    errorState.classList.remove('hidden');
+  } else if (state === 'content') {
+    content.classList.remove('hidden');
   }
-};
+}
 
 // ===================== RENDER =====================
-const renderMedia = (data) => {
-  DOM.media.innerHTML = '';
-  
+function renderMedia(data) {
+  mediaWrapper.innerHTML = '';
+
   if (data.media_type === 'video') {
-    DOM.hdOverlay.classList.add('hidden');
-    DOM.download.classList.add('hidden');
-    
-    const container = document.createElement('div');
-    container.className = 'w-full';
-    container.style.aspectRatio = '16 / 9';
-    container.innerHTML = `
+    hdOverlay.classList.add('hidden');
+    oneClickDownloadBtn.classList.add('hidden');
+
+    const iframeContainer = document.createElement('div');
+    iframeContainer.className = 'w-full';
+    iframeContainer.style.aspectRatio = '16 / 9';
+    iframeContainer.innerHTML = `
       <iframe
         src="${data.url}"
         class="w-full h-full"
@@ -132,222 +115,163 @@ const renderMedia = (data) => {
         allowfullscreen
       ></iframe>
     `;
-    DOM.media.appendChild(container);
-    return;
-  }
-  
-  // Image
-  const img = document.createElement('img');
-  img.src = data.url;
-  img.alt = data.title || TRANSLATIONS[state.lang].untitled;
-  img.className = 'w-full object-contain';
-  img.style.maxHeight = '550px';
-  img.loading = 'lazy';
-  DOM.media.appendChild(img);
-  
-  const bestUrl = data.hdurl || data.url;
-  DOM.hdLink.href = bestUrl;
-  
-  state.currentDownloadUrl = bestUrl;
-  const extMatch = bestUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i);
-  const ext = extMatch ? extMatch[1] : 'jpg';
-  const safeName = (data.title || 'astrowafy-image')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-  state.currentDownloadName = `astrowafy-${data.date || ''}-${safeName}.${ext}`;
-  
-  DOM.hdOverlay.classList.remove('hidden');
-  DOM.download.classList.remove('hidden');
-};
+    mediaWrapper.appendChild(iframeContainer);
+  } else {
+    const img = document.createElement('img');
+    img.src = data.url;
+    img.alt = data.title || translations[currentLang].untitled;
+    img.className = 'w-full object-contain';
+    img.style.maxHeight = '550px';
+    mediaWrapper.appendChild(img);
 
-const renderInfo = async (data) => {
-  const lang = state.lang;
-  DOM.date.textContent = formatDateDMY(data.date);
-  
+    const bestUrl = data.hdurl || data.url;
+    hdLink.href = bestUrl;
+
+    currentDownloadUrl = bestUrl;
+    const extMatch = bestUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i);
+    const ext = extMatch ? extMatch[1] : 'jpg';
+    const safeName = (data.title || 'astrowafy-image')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    currentDownloadName = `astrowafy-${data.date || ''}-${safeName}.${ext}`;
+
+    hdOverlay.classList.remove('hidden');
+    oneClickDownloadBtn.classList.remove('hidden');
+  }
+}
+
+async function renderInfo(data) {
+  const lang = currentLang;
+  apodDate.textContent = formatDateDMY(data.date);
+
   if (lang === 'en') {
-    DOM.title.textContent = data.title || TRANSLATIONS.en.untitled;
-    DOM.explanation.textContent = data.explanation || '';
-    DOM.title.classList.remove('bn-text');
-    DOM.explanation.classList.remove('bn-text');
-    DOM.title.style.opacity = '1';
-    DOM.explanation.style.opacity = '1';
+    apodTitle.textContent = data.title || translations.en.untitled;
+    apodExplanation.textContent = data.explanation || '';
+    apodTitle.classList.remove('bn-text');
+    apodExplanation.classList.remove('bn-text');
+    apodTitle.style.opacity = '1';
+    apodExplanation.style.opacity = '1';
     return;
   }
-  
+
   const cacheKey = `${data.date}_${lang}`;
-  if (state.translationCache[cacheKey]) {
-    DOM.title.textContent = state.translationCache[cacheKey].title;
-    DOM.explanation.textContent = state.translationCache[cacheKey].explanation;
-    DOM.title.classList.add('bn-text');
-    DOM.explanation.classList.add('bn-text');
-    DOM.title.style.opacity = '1';
-    DOM.explanation.style.opacity = '1';
+  if (translationCache[cacheKey]) {
+    apodTitle.textContent = translationCache[cacheKey].title;
+    apodExplanation.textContent = translationCache[cacheKey].explanation;
+    apodTitle.classList.add('bn-text');
+    apodExplanation.classList.add('bn-text');
+    apodTitle.style.opacity = '1';
+    apodExplanation.style.opacity = '1';
     return;
   }
-  
-  DOM.title.style.opacity = '0.4';
-  DOM.explanation.style.opacity = '0.4';
-  
+
+  apodTitle.style.opacity = '0.4';
+  apodExplanation.style.opacity = '0.4';
+
   const [translatedTitle, translatedExplanation] = await Promise.all([
     translateText(data.title || '', lang),
     translateText(data.explanation || '', lang)
   ]);
-  
-  state.translationCache[cacheKey] = {
-    title: translatedTitle || data.title || TRANSLATIONS[lang].untitled,
+
+  translationCache[cacheKey] = {
+    title: translatedTitle || data.title || translations[lang].untitled,
     explanation: translatedExplanation || data.explanation || ''
   };
-  
-  if (state.lang === lang && state.lastData?.date === data.date) {
-    DOM.title.textContent = state.translationCache[cacheKey].title;
-    DOM.explanation.textContent = state.translationCache[cacheKey].explanation;
-    DOM.title.classList.add('bn-text');
-    DOM.explanation.classList.add('bn-text');
-    DOM.title.style.opacity = '1';
-    DOM.explanation.style.opacity = '1';
+
+  if (currentLang === lang && lastAPODData && lastAPODData.date === data.date) {
+    apodTitle.textContent = translationCache[cacheKey].title;
+    apodExplanation.textContent = translationCache[cacheKey].explanation;
+    apodTitle.classList.add('bn-text');
+    apodExplanation.classList.add('bn-text');
+    apodTitle.style.opacity = '1';
+    apodExplanation.style.opacity = '1';
   }
-};
+}
 
 // ===================== FETCH =====================
-const fetchAPOD = async (dateStr) => {
+async function fetchAPOD(dateStr) {
   setState('loading');
-  DOM.refreshIcon.classList.add('animate-spin');
-  
+  refreshIcon.classList.add('animate-spin');
+
   try {
     const url = dateStr 
-      ? `${CONFIG.API_URL}?api_key=${CONFIG.API_KEY}&date=${dateStr}`
-      : `${CONFIG.API_URL}?api_key=${CONFIG.API_KEY}`;
-    
+      ? `${API_URL}?api_key=${apiKey}&date=${dateStr}`
+      : `${API_URL}?api_key=${apiKey}`;
+      
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
     const data = await response.json();
-    state.lastData = data;
-    
+    lastAPODData = data;
+
     renderMedia(data);
     await renderInfo(data);
     setState('content');
   } catch (err) {
-    console.error('Fetch error:', err);
+    console.error('AstroWafy fetch error:', err);
     setState('error');
   } finally {
-    DOM.refreshIcon.classList.remove('animate-spin');
+    refreshIcon.classList.remove('animate-spin');
   }
-};
+}
 
-// ===================== SHARE =====================
-const shareAPOD = async () => {
-  if (!state.lastData) return;
-  
-  const shareData = {
-    title: state.lastData.title || 'AstroWafy',
-    text: `${state.lastData.title || 'AstroWafy'}\n${(state.lastData.explanation || '').slice(0, 150)}...`,
-    url: window.location.href
-  };
-  
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      const label = DOM.downloadLabel.textContent;
-      DOM.downloadLabel.textContent = '✅ Copied!';
-      setTimeout(() => { DOM.downloadLabel.textContent = label; }, 2000);
-    }
-  } catch (err) {
-    if (err.name !== 'AbortError') {
-      console.error('Share error:', err);
-    }
-  }
-};
-
-// ===================== DOWNLOAD =====================
-const downloadAPOD = async () => {
-  if (!state.currentDownloadUrl) return;
-  
-  DOM.download.disabled = true;
-  DOM.downloadIcon.classList.add('animate-bounce');
-  DOM.downloadLabel.textContent = 'Downloading…';
-  
-  try {
-    const response = await fetch(state.currentDownloadUrl);
-    if (!response.ok) throw new Error('Download failed');
-    
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = state.currentDownloadName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
-  } catch (err) {
-    console.error('Download error:', err);
-    window.open(state.currentDownloadUrl, '_blank');
-  } finally {
-    DOM.download.disabled = false;
-    DOM.downloadIcon.classList.remove('animate-bounce');
-    DOM.downloadLabel.textContent = 'Download';
-  }
-};
-
-// ===================== KEYBOARD SHORTCUTS =====================
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'r' || e.key === 'R') {
-    e.preventDefault();
-    DOM.refreshBtn.click();
-  }
-  if (e.key === 's' || e.key === 'S') {
-    e.preventDefault();
-    DOM.shareBtn?.click();
-  }
-  if (e.key === 'd' || e.key === 'D') {
-    e.preventDefault();
-    DOM.download?.click();
-  }
-});
-
-// ===================== EVENT LISTENERS =====================
+// ===================== EVENTS =====================
 document.addEventListener('DOMContentLoaded', () => {
-  applyLanguage(state.lang);
+  applyLanguage(currentLang);
+
+  const today = getNASADate();
+  const maxDate = getMaxDate();
   
-  const today = getTodayForAPOD();
-  const maxDate = todayUTC();
-  
-  DOM.datePicker.value = today;
-  DOM.datePicker.max = maxDate;
+  datePicker.value = today;
+  datePicker.max = maxDate;
   
   fetchAPOD(today);
 });
 
-DOM.datePicker.addEventListener('change', () => {
-  if (DOM.datePicker.value) {
-    fetchAPOD(DOM.datePicker.value);
+datePicker.addEventListener('change', () => {
+  if (datePicker.value) {
+    fetchAPOD(datePicker.value);
   }
 });
 
-DOM.refreshBtn.addEventListener('click', () => {
-  const selected = DOM.datePicker.value || getTodayForAPOD();
+refreshBtn.addEventListener('click', () => {
+  const selected = datePicker.value || getNASADate();
   fetchAPOD(selected);
 });
 
-DOM.shareBtn?.addEventListener('click', shareAPOD);
-DOM.download.addEventListener('click', downloadAPOD);
+// ===================== ONE-CLICK DOWNLOAD =====================
+oneClickDownloadBtn.addEventListener('click', async () => {
+  if (!currentDownloadUrl) return;
 
-// ===================== SERVICE WORKER (PWA) =====================
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .catch(err => console.log('SW registration failed:', err));
-}
+  oneClickDownloadBtn.disabled = true;
+  oneClickDownloadIcon.classList.add('animate-bounce');
+  oneClickDownloadLabel.textContent = 'Downloading…';
 
-// ===================== ANALYTICS (Privacy-Friendly) =====================
-// If you want to add analytics, use this pattern:
-// window.addEventListener('load', () => {
-//   // Your analytics code here
-// });
+  try {
+    const response = await fetch(currentDownloadUrl);
+    if (!response.ok) throw new Error('Download request failed');
 
-console.log('🚀 AstroWafy initialized successfully!');
-console.log(`📍 Language: ${state.lang}`);
-console.log(`📅 Today: ${getTodayForAPOD()}`);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = currentDownloadName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error('AstroWafy download error:', err);
+    window.open(currentDownloadUrl, '_blank');
+  } finally {
+    oneClickDownloadBtn.disabled = false;
+    oneClickDownloadIcon.classList.remove('animate-bounce');
+    oneClickDownloadLabel.textContent = 'Download';
+  }
+});
