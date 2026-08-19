@@ -3,9 +3,15 @@ const apiKey = 'bsog63BaN0sXddiIP6JakDc3agNjtmZ1pnyAumxO';
 const API_URL = 'https://api.nasa.gov/planetary/apod';
 
 // ===================== I18N =====================
+// Only the APOD title + explanation change language.
+// All other interface text always stays in English.
 const translations = {
-  en: { untitled: 'Untitled' },
-  bn: { untitled: 'শিরোনামহীন' }
+  en: {
+    untitled: 'Untitled'
+  },
+  bn: {
+    untitled: 'শিরোনামহীন'
+  }
 };
 
 let currentLang = localStorage.getItem('astrowafy_lang') || 'en';
@@ -15,18 +21,23 @@ const translationCache = {};
 // ===================== DOM REFERENCES =====================
 const langEnBtn = document.getElementById('langEnBtn');
 const langBnBtn = document.getElementById('langBnBtn');
+
 const datePicker = document.getElementById('datePicker');
 const refreshBtn = document.getElementById('refreshBtn');
 const refreshIcon = document.getElementById('refreshIcon');
+
 const loadingState = document.getElementById('loadingState');
 const errorState = document.getElementById('errorState');
 const content = document.getElementById('content');
+
 const mediaWrapper = document.getElementById('mediaWrapper');
 const hdOverlay = document.getElementById('hdOverlay');
 const hdLink = document.getElementById('hdLink');
+
 const oneClickDownloadBtn = document.getElementById('oneClickDownloadBtn');
 const oneClickDownloadLabel = document.getElementById('oneClickDownloadLabel');
 const oneClickDownloadIcon = document.getElementById('oneClickDownloadIcon');
+
 const apodTitle = document.getElementById('apodTitle');
 const apodDate = document.getElementById('apodDate');
 const apodExplanation = document.getElementById('apodExplanation');
@@ -34,30 +45,17 @@ const apodExplanation = document.getElementById('apodExplanation');
 let currentDownloadUrl = '';
 let currentDownloadName = 'astrowafy-image.jpg';
 
-// ===================== NASA TIME (UTC) =====================
-function getNASA Date() {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
-}
-
-function getMaxDate() {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
-}
-
-function formatDateDMY(isoDate) {
-  if (!isoDate) return '';
-  const [y, m, d] = isoDate.split('-');
-  return `${d}-${m}-${y}`;
-}
-
 // ===================== LANGUAGE =====================
 function applyLanguage(lang) {
   currentLang = lang;
   localStorage.setItem('astrowafy_lang', lang);
+
   langEnBtn.classList.toggle('active', lang === 'en');
   langBnBtn.classList.toggle('active', lang === 'bn');
-  if (lastAPODData) renderInfo(lastAPODData);
+
+  if (lastAPODData) {
+    renderInfo(lastAPODData);
+  }
 }
 
 langEnBtn.addEventListener('click', () => applyLanguage('en'));
@@ -79,6 +77,19 @@ async function translateText(text, targetLang) {
 }
 
 // ===================== HELPERS =====================
+function todayISO() {
+  const d = new Date();
+  const offset = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - offset * 60 * 1000);
+  return local.toISOString().split('T')[0];
+}
+
+function formatDateDMY(isoDate) {
+  if (!isoDate) return '';
+  const [y, m, d] = isoDate.split('-');
+  return `${d}-${m}-${y}`;
+}
+
 function setState(state) {
   loadingState.classList.add('hidden');
   loadingState.classList.remove('flex');
@@ -100,6 +111,7 @@ function renderMedia(data) {
   mediaWrapper.innerHTML = '';
 
   if (data.media_type === 'video') {
+    // Videos have no direct downloadable file, hide both download controls.
     hdOverlay.classList.add('hidden');
     oneClickDownloadBtn.classList.add('hidden');
 
@@ -179,6 +191,7 @@ async function renderInfo(data) {
     explanation: translatedExplanation || data.explanation || ''
   };
 
+  // Guard against race conditions (language or date changed mid-translation)
   if (currentLang === lang && lastAPODData && lastAPODData.date === data.date) {
     apodTitle.textContent = translationCache[cacheKey].title;
     apodExplanation.textContent = translationCache[cacheKey].explanation;
@@ -195,10 +208,7 @@ async function fetchAPOD(dateStr) {
   refreshIcon.classList.add('animate-spin');
 
   try {
-    const url = dateStr 
-      ? `${API_URL}?api_key=${apiKey}&date=${dateStr}`
-      : `${API_URL}?api_key=${apiKey}`;
-      
+    const url = `${API_URL}?api_key=${apiKey}&date=${dateStr}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -223,12 +233,9 @@ async function fetchAPOD(dateStr) {
 document.addEventListener('DOMContentLoaded', () => {
   applyLanguage(currentLang);
 
-  const today = getNASADate();
-  const maxDate = getMaxDate();
-  
+  const today = todayISO();
   datePicker.value = today;
-  datePicker.max = maxDate;
-  
+  datePicker.max = today;
   fetchAPOD(today);
 });
 
@@ -239,11 +246,14 @@ datePicker.addEventListener('change', () => {
 });
 
 refreshBtn.addEventListener('click', () => {
-  const selected = datePicker.value || getNASADate();
+  const selected = datePicker.value || todayISO();
   fetchAPOD(selected);
 });
 
 // ===================== ONE-CLICK DOWNLOAD =====================
+// Always visible on the media card (no hover/tap-to-reveal needed first).
+// Fetches the image as a blob and triggers an instant save; falls back to
+// opening the image in a new tab if the host blocks the cross-origin fetch.
 oneClickDownloadBtn.addEventListener('click', async () => {
   if (!currentDownloadUrl) return;
 
