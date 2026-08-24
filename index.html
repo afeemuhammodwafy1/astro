@@ -3,12 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AstroWafy</title>
 
-<!-- Tailwind CDN -->
+<!-- ===================== FAVICON INTEGRATION ===================== -->
+<link rel="icon" type="image/webp" href="icon.webp">
+<link rel="apple-touch-icon" href="icon.webp">
+
+<!-- ===================== PRIMARY SEO META TAGS ===================== -->
+<title>AstroWafy — NASA Astronomy Picture of the Day (APOD)</title>
+<meta name="title" content="AstroWafy — NASA Astronomy Picture of the Day (APOD)">
+<meta name="description" content="Explore NASA's Astronomy Picture of the Day (APOD) with high-definition space imagery, bilingual English & Bengali explanations, and instant one-click downloads.">
+<meta name="keywords" content="AstroWafy, NASA APOD, astronomy picture of the day, space images, bangla astronomy, universe exploration, space api, Afee Muhammod Wafy">
+<meta name="author" content="Afee Muhammod Wafy">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://astro.amwafy.xyz">
+
+<!-- ===================== OPEN GRAPH / SOCIAL / GEO ===================== -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://astro.amwafy.xyz">
+<meta property="og:title" content="AstroWafy — NASA Astronomy Picture of the Day (APOD)">
+<meta property="og:description" content="Discover daily high-definition astronomy pictures directly from NASA Open APIs with seamless Bengali translation support.">
+<meta property="og:image" content="https://astro.amwafy.xyz/icon.webp">
+
+<!-- ===================== TWITTER CARD ===================== -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://astro.amwafy.xyz">
+<meta property="twitter:title" content="AstroWafy — NASA Astronomy Picture of the Day (APOD)">
+<meta property="twitter:description" content="Explore NASA APOD with real-time English to Bengali translations and one-click downloads.">
+<meta property="twitter:image" content="https://astro.amwafy.xyz/icon.webp">
+
+<!-- ===================== AEO / GEO STRUCTURED DATA (JSON-LD) ===================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://astro.amwafy.xyz/#webapp",
+      "name": "AstroWafy",
+      "url": "https://astro.amwafy.xyz",
+      "description": "A minimalist web application that presents NASA's Astronomy Picture of the Day with dual English and Bengali translation support, time-travel exploration, and one-click HD downloads.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "All",
+      "author": {
+        "@type": "Person",
+        "name": "Afee Muhammod Wafy",
+        "url": "https://amwafy.xyz"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://astro.amwafy.xyz/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is AstroWafy?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AstroWafy is a lightweight, zero-dependency web application powered by NASA Open APIs that lets users explore daily space imagery with Bengali translation and direct image downloads."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does AstroWafy provide Bengali translations?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AstroWafy dynamically translates NASA APOD titles and astronomical explanations into Bengali on the client side, complete with memory caching for fast performance."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<!-- ===================== TAILWIND & FONTS ===================== -->
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Google Fonts: Plus Jakarta Sans, JetBrains Mono, Noto Sans Bengali -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -86,7 +160,7 @@
       <!-- Media Card -->
       <div class="media-card relative border border-neutral-900 rounded-2xl overflow-hidden bg-neutral-950 fade-in">
 
-        <!-- One-Click Download Button — always visible, no hover/tap-to-reveal needed -->
+        <!-- One-Click Download Button -->
         <button id="oneClickDownloadBtn" type="button" class="one-click-download btn-press hidden">
           <span id="oneClickDownloadLabel">Download</span>
           <svg id="oneClickDownloadIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
